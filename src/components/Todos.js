@@ -19,7 +19,7 @@ function Todos({ todos, onCreate, onToggle }) {
         <input type="text" value={text} onChange={onChange} />
       </form>
       {todos.map(todo => (
-        <Todo todo={todo} onToggle={onToggle} />
+        <Todo key={todo.id} todo={todo} onToggle={onToggle} />
       ))}
     </div>
   );
