@@ -1,11 +1,12 @@
 import * as postsAPI from '../api/posts';
 import {
-  createPromiseThunk,
-  createPromiseThunkById,
   reducerUtils,
   handleAsyncActions,
   handleAsyncActionsById,
+  createPromiseSagaById,
+  createPromiseSaga,
 } from '../lib/asyncUtils';
+import { takeEvery, getContext, select } from 'redux-saga/effects';
 
 const GET_POSTS = 'GET_POSTS';
 const GET_POSTS_SUCCESS = 'GET_POSTS_SUCCESS';
@@ -16,12 +17,36 @@ const GET_POST_SUCCESS = 'GET_POST_SUCCESS';
 const GET_POST_ERROR = 'GET_POST_ERROR';
 
 const CLEAR_POST = 'CLEAR_POST';
+const GO_TO_HOME = 'GO_TO_HOME';
+const PRINT_STATE = 'PRINT_STATE';
+export const getPosts = () => ({ type: GET_POSTS });
+export const getPost = id => ({ type: GET_POST, payload: id, meta: id });
+export const printState = () => ({ type: PRINT_STATE });
 
-export const getPosts = createPromiseThunk(GET_POSTS, postsAPI.getPosts);
-export const getPost = createPromiseThunkById(GET_POST, postsAPI.getPostById);
-export const goToHome = () => (dispatch, getState, { history }) => {
+const getPostsSaga = createPromiseSaga(GET_POSTS, postsAPI.getPosts);
+const getPostSaga = createPromiseSagaById(GET_POST, postsAPI.getPostById);
+
+//history 접근 saga
+function* goToHomeSaga() {
+  const history = yield getContext('history');
   history.push('/');
-};
+}
+function* printStateSaga() {
+  const state = yield select(state => state);
+  console.log(state);
+}
+export function* postsSaga() {
+  yield takeEvery(GET_POSTS, getPostsSaga);
+  yield takeEvery(GET_POST, getPostSaga);
+  yield takeEvery(GO_TO_HOME, goToHomeSaga);
+  yield takeEvery(PRINT_STATE, printStateSaga);
+}
+
+//history에 접근하는 thunk함수
+// export const goToHome = () => (dispatch, getState, { history }) => {
+//   history.push('/');
+// };
+export const goToHome = () => ({ type: GO_TO_HOME });
 export const clearPost = () => ({ type: CLEAR_POST });
 const initialState = {
   posts: reducerUtils.initial(),

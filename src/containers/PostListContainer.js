@@ -5,7 +5,6 @@ import PostList from '../components/PostList';
 
 function PostListContainer() {
   const { loading, data, error } = useSelector(state => state.posts.posts);
-  console.log(data);
   const dispatch = useDispatch();
   useEffect(() => {
     dispatch(getPosts());
